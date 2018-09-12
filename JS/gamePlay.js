@@ -1,0 +1,253 @@
+"use strict";
+
+let dQlfy;
+let canPlay = true;
+let startGame = true;
+const account = {
+  balance: 10000,
+  pairplus: 0,
+  ante: 0,
+  play: 0
+}
+
+function newGame(){
+  glassBtnCanvas.style.zIndex = 10;
+  glassCanvas.style.zIndex =10;
+  pAnictx.clearRect(0,0,cWidth,cHeight);
+  gctx.clearRect(0,0,cWidth,cHeight);//move this later
+  ctx.clearRect(0,0,cWidth,cHeight);
+
+  account.balance -= (account.ante+account.pairplus)
+  deck = deckCards.slice(0,52);
+  pHand = dealHand();
+  getWinInfo(pHand);
+  dealCards();
+  setTimeout(()=>{
+    if(account.pairplus>0) ppPayout();
+    //write player's hand type
+    gctx.fillText(pHand.type,cWidth/2, pYLoc+cardH/2,cWidth/2);
+    glassBtnCanvas.style.zIndex = -1;
+    canPlay = true;
+  },2000);
+  console.log(account.balance);
+}
+
+function play(){
+  if(canPlay){
+    glassBtnCanvas.style.zIndex = 10;
+    canPlay = false;
+    account.balance -= account.ante;
+    account.play = account.ante;
+    dealerAction();
+    findWinner();
+  }
+}
+
+function fold(){
+  if(canPlay){
+    glassBtnCanvas.style.zIndex = 10;
+    canPlay = false;
+    dealerAction();
+    // slideChipStack(account.ante, xBetLocsArr[1], chipYLoc, cWidth, -cHeight/4, anictx);
+    tctx.save()
+    transCanvas.style.zIndex = 10;
+    anictx.clearRect(xBetLocsArr[1],0,chipW,cHeight);
+    animations.slideCanvas(tctx, transCanvas, 0, 0, cWidth/2, -cHeight, 50, 0, ()=>{
+      tctx.clearRect(0,0,cWidth,cHeight);
+      displayAnteChips(tctx);
+    },()=>{
+      tctx.restore();
+      transCanvas.style.zIndex=-1;
+    });
+  }
+}
+
+function dealerAction(){
+    glassBtnCanvas.style.zIndex = 10;
+    dHand = dealHand();
+    drawDealerHand();
+    console.log(account.balance);
+    getWinInfo(dHand);
+    gctx.fillText(dHand.type,cWidth/2, dYLoc+cardH/2,cWidth/2);
+    startGame = true;
+    getChipStacks();
+    setTimeout(()=>{
+      discard();
+    },2000)
+}
+
+//Algorithiums hardcoded for 3 card hands due to computational simplicity
+//Dynamic algos can be seen in Video Poker game
+function findHandType(hand){
+  let cardVals = hand.map(c=>{return parseInt(c.slice(0,c.length-1))});
+  let cardSuits = hand.map(c=>{return c.slice(c.length-1,c.length)});
+  let uniqVals = [...new Set(cardVals)];
+  let uniqSuits = [...new Set(cardSuits)];
+
+  // adds sorted values to hand
+  let cSort = cardVals.sort(function(a, b){return a-b})
+  hand.sort = cSort;
+
+  if(uniqVals.length==2){return 'Pair';}//Pair
+  else if(uniqVals.length==1){return '3 of a Kind';}//3 of a Kind
+  else if(uniqSuits.length==1){
+    //checks for straight flush
+    if(cSort[2]-cSort[0]==2||(cSort[2]==14&&cSort[0]==2&&cSort[1]==3)){return 'Straight Flush';}
+    else{return 'Flush';};
+  }
+  if(cSort[2]-cSort[0]==2||(cSort[2]==14&&cSort[0]==2&&cSort[1]==3)){return 'Straight';}
+
+  if(hand===dHand){
+    if(cSort[2]<12){dQlfy=false;}
+  }
+  return 'High Card';
+}
+
+//appends properties to hand Array object
+function getWinInfo(hand){
+  hand.type = findHandType(hand);//This is Javascript
+  if(hand.type!='High Card'){hand.winInfo = paytableMap.get(hand.type)}
+  else(hand.winInfo = {pos: 0})
+}
+
+//Looks for condition for Player Win or Push. Player loses by default.
+function findWinner(){
+  if(dQlfy==false){
+    gctx.fillText('Dealer Does Not Quality',cWidth/2,cHeight/2,cWidth*0.8);
+    account.bet+=2*account.ante;
+    console.log('dealer does not qualify');
+  }else if(dQlfy){
+    let dPos = dHand.winInfo.pos,
+      pPos = pHand.winInfo.pos;
+    if(dPos<pPos){playerWins();}
+    else if(dPos==pPos){settlePush();}
+    else{playerLoses();}
+  }
+  console.log(account.balance);
+  setTimeout(()=>{
+    account.play = 0; //Move later;
+  },1000);
+}
+
+//finds winner if player and dealer have same type of hand
+function settlePush(){
+  let pSort = pHand.sort,
+  dSort = dHand.sort;
+
+  if(pHand.type=="Pair"){
+    let pPair = pSort[1],
+      dPair = dSort[1];
+    //Find Higher Pair
+    if(pPair>dPair){playerWins()}
+    else if(pPair==dPair){compareHighCard();}
+    else{playerLoses();}
+  }else{
+    if((pHand.type=="Straight"||pHand.type=="Straight Flush")&&dSort[3]==14&&dSort[2]<pSort[2]){playerWins();}//Looks for lower straight condition
+    else{compareHighCard();}
+  }
+
+  function compareHighCard(){
+    if(pSort[2]>dSort[2]){playerWins();}
+    else if(pSort[2]==dSort[2]){
+      if(pSort[1]>dSort[1]){playerWins();}
+      else if(pSort[1]==dSort[1]){
+        if(pSort[0]>dSort[0]){playerWins();}
+        else if(pSort[0]==dSort[0]){push();}
+      }
+    }
+    else{playerLoses();}
+  }
+}
+
+function ppPayout(){
+  if(pHand.type!="High Card"){
+    account.balance+=(pHand.winInfo.pp+1)*account.pairplus;
+  }else{
+    tctx.save();
+    // slides pairplus stack of chips to dealer side
+    transCanvas.style.zIndex = 10;
+    anictx.clearRect(xBetLocsArr[0],0,chipW,cHeight);
+    animations.slideCanvas(tctx, transCanvas, 0, 0, cWidth/2, -cHeight, 50, 0, ()=>{
+      tctx.clearRect(0,0,cWidth,cHeight);
+      displayPairPlusChips(tctx);
+    },()=>{
+      tctx.restore();
+      transCanvas.style.zIndex=-1;
+    });
+  }
+}
+
+function discard(){
+  anictx.clearRect(0,0,cWidth,cHeight);
+  gctx.clearRect(0,0,cWidth,cHeight);
+  let pace = 40,
+    delay = 10;
+
+  for(let i = 0; i<numCards; i++){
+    let pCard = cardImgMap.get(pHand[i]),
+      dCard = cardImgMap.get(dHand[i]),
+      xStart = cardXLocArr[i];
+
+    animations.slide(pCard, xStart, pYLoc, -2*cardW, -2*cardH, cardW, cardH, pace, delay*i, pAnictx, ()=>{});
+    animations.slide(dCard, xStart, dYLoc, -2*cardW, -2*cardH, cardW, cardH, pace, delay*i, ctx, ()=>{
+      glassCanvas.style.zIndex = -1;
+      glassBtnCanvas.style.zIndex = -1;
+      displayAllBetChips();
+    });
+  }
+}
+
+function playerWins(){
+  gctx.fillText('Player Wins',cWidth/2,cHeight/2,cWidth);
+  console.log('PlayerWins');
+  account.balance+=2*account.ante;
+  account.balance+=2*account.play;
+  tctx.save();
+  //doubles and slides ante and play chips to player side
+  transCanvas.style.zIndex = 10;
+  animations.slideCanvas(tctx, transCanvas, cWidth/2, -cHeight, 0, 0, 60, 0, ()=>{
+    tctx.clearRect(0,0,cWidth,cHeight);
+    displayAnteChips(tctx);
+    displayPlayChips(tctx);
+  },()=>{
+    displayBetChips(account.ante*2,xBetLocsArr[1],tctx);
+    displayBetChips(account.ante*2,xBetLocsArr[2],tctx);
+    setTimeout(()=>{
+      animations.slideCanvas(tctx, transCanvas, 0, 0, -cWidth/2, cHeight,60, 0, ()=>{
+        tctx.clearRect(0,0,cWidth,cHeight);
+        anictx.clearRect(0,0,cWidth,cHeight);
+        displayBetChips(account.ante*2,xBetLocsArr[1],tctx);
+        displayBetChips(account.ante*2,xBetLocsArr[2],tctx);
+      },()=>{
+        tctx.restore();
+        transCanvas.style.zIndex=-1;
+      });
+
+    },1000)
+  });
+}
+
+function playerLoses(){
+  gctx.fillText('Dealer Wins',cWidth/2,cHeight/2,cWidth);
+  console.log('Player loses');
+  tctx.save();
+  //slides ante and play chips to dealer side
+  transCanvas.style.zIndex = 10;
+  anictx.clearRect(xBetLocsArr[1],0,chipW,cHeight);
+  anictx.clearRect(xBetLocsArr[2],0,chipW,cHeight);
+  animations.slideCanvas(tctx, transCanvas, 0, 0, cWidth/2, -cHeight, 40, 0, ()=>{
+    tctx.clearRect(0,0,cWidth,cHeight);
+    displayAnteChips(tctx);
+    displayPlayChips(tctx);
+  },()=>{
+    tctx.restore();
+    transCanvas.style.zIndex=-1;
+  });
+}
+
+function push(){
+  console.log('push');
+  gctx.fillText('Push',cWidth/2,cHeight/2,cWidth);
+  account.balance+=account.ante;
+  account.balance+=account.play;
+}
