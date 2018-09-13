@@ -323,6 +323,7 @@ btnCanvas.addEventListener('click', function(evt){
       console.log('rebet click');
       if(checkBalance(0)){
         rebet();
+        // startGame = true;;
         canPlay = true;
       }
       // startGame = true;

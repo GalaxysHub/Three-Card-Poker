@@ -198,5 +198,7 @@ function rebet(){
   slideChipStack('bottomUp',['Pair+','Ante'], [account.pairplus, account.ante],()=>{
     displayPairPlusChips(anictx);
     displayAnteChips(anictx);
+    newGame();
   },50);
+
 }
