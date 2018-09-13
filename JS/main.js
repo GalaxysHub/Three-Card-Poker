@@ -1,84 +1,100 @@
 "use strict";
 
-const cWidth = 1000;
-const cHeight = 700;
-const cShiftY = 0;
+const cHeight = Math.floor(window.innerHeight*0.8),
+  cWidth = Math.floor(cHeight*3/2);
+
+const cShiftY = -5;
 const xMargin = 0;
 
-const bCanvas = document.getElementById("bannerCanvas")
-const BGCanvas = document.getElementById('BGCanvas');
-const mainCanvas = document.getElementById('mainCanvas');
-const aniCanvas = document.getElementById('aniCanvas');
-const glassCanvas = document.getElementById('glassCanvas');
-const BGctx = BGCanvas.getContext('2d');
-const ctx = mainCanvas.getContext('2d');
-const anictx = aniCanvas.getContext('2d');
-const xBorder = cWidth/50;
+const bCanvas = document.getElementById("bannerCanvas"),
+  BGCanvas = document.getElementById('BGCanvas'),
+  mainCanvas = document.getElementById('mainCanvas'),
+  aniCanvas = document.getElementById('aniCanvas'),
+  pAniCanvas = document.getElementById('pAniCanvas'),
+  transCanvas = document.getElementById('transCanvas'),
+  glassCanvas = document.getElementById('glassCanvas');
+const BGctx = BGCanvas.getContext('2d'),
+  ctx = mainCanvas.getContext('2d'),
+  anictx = aniCanvas.getContext('2d'),
+  pAnictx = pAniCanvas.getContext('2d'),
+  gctx = glassCanvas.getContext('2d'),
+  tctx = transCanvas.getContext('2d');
 
-const maxCoins = 5;
-const minBet = 100, maxBet = minBet*maxCoins;
-let numCoins = 1;
+  const canvasArr = [bCanvas, BGCanvas, mainCanvas,aniCanvas,pAniCanvas,transCanvas,glassCanvas];
+  const ctxArr = [BGctx, ctx, anictx, pAnictx, gctx, tctx];
 
-const numCards = 5;
-const xDif = cWidth/20;
-const xDifS = cWidth/40;
-const cardW = (cWidth-2*xBorder-(numCards+1)*xDif)/numCards;
-const cardWS = (cWidth-2*xBorder-(numCards+1)*xDifS)/numCards;
-const HWr = 3/2;
-const cardH = cardW*HWr;
-const cardHS = cardWS*HWr;
+  canvasArr.forEach(cnv=>{
+    cnv.style.position = 'absolute';
+    cnv.style.marginTop = cShiftY+'px';
+    cnv.width = cWidth;
+    cnv.height = cHeight;
+  })
 
-ctx.globalCompositionOperation='destination-over';
-BGctx.globalCompositionOperation='destination-over';
+  ctxArr.forEach(cvs=>{
+    cvs.globalCompositionOperation = 'destination-over';
+    cvs.textAlign = 'center';
+    cvs.textBaseline = 'middle';
+  })
+  
+const numCards = 3,
+  xDif = Math.floor(cWidth/20),
+  cardW = Math.floor(cWidth/8),
+  HWr = 3/2,
+  cardH = Math.floor(cardW*HWr);
 
-bCanvas.style.position = mainCanvas.style.position = BGCanvas.style.position = aniCanvas.style.position = glassCanvas.style.position = 'absolute';
-mainCanvas.width = BGCanvas.width = aniCanvas.width = glassCanvas.width = cWidth;
-mainCanvas.height = BGCanvas.height = aniCanvas.height =  glassCanvas.height = cHeight;
+const minBet = 100,
+  maxBet = minBet*20;
+
 
 BGCanvas.style.zIndex = -1;
 glassCanvas.style.zIndex = -1;
-aniCanvas.style.zIndex = 1;
-mainCanvas.style.zIndex = 5;
+aniCanvas.style.zIndex = 2;
+mainCanvas.style.zIndex = 1;
+pAniCanvas.style.zIndex = 3;
+transCanvas.style.zIndex = 0;
+
+function setMainctxProps(){
+  let fontSize =  Math.floor(cHeight/8),
+    gFontSize = fontSize*1.5;
+
+  ctx.fillStyle = 'red';
+  gctx.fillStyle = 'red';
+  ctx.font = fontSize+'px Arial';
+  gctx.font = gFontSize+'px Arial';
+}
+setMainctxProps();
 
 const paytableMap = new Map([
-  ["Coins Wagered", 1],
-  ["Royal Flush", 250],
-  ["Straight Flush", 50],
-  ["4 of a Kind", 25],
-  ["Full House", 9],
-  ["Flush", 6],
-  ["Straight", 4],
-  ["3 of a Kind", 3],
-  ["2 Pair", 2],
-  ["Jacks or Better", 1],
+  ["Royal Flush", {pp: 250, pos: 6}],
+  ["Straight Flush", {pp: 40, pos: 5}],
+  ["3 of a Kind", {pp: 30, pos: 4}],
+  ["Straight", {pp: 6, pos: 3}],
+  ["Flush", {pp: 3, pos: 2}],
+  ["Pair", {pp: 1, pos: 1}]
 ])
 
-const PTKeys = [...paytableMap.keys()];
-
-const PTCords = {
-  maxW: cWidth/10,
-  xMargin: Math.floor(cWidth/6),
-  yTop: Math.floor(cHeight/15),
-  yDif: (cHeight/2)/paytableMap.size,
-  fontSize: cHeight/25
-}
-PTCords.xDif = Math.floor((cWidth-PTCords.maxW-PTCords.xMargin)/(maxCoins+1))
-PTCords.yDif = Math.floor((cHeight/2)/paytableMap.size);
-
-const setUp = (function(){
+// const setUp = (function(){
   const cardPicLoc = "./Images/Cards/";
   const picLoc = "./Images/Misc/";
   const cardImgMap = new Map();
   const miscImgMap = new Map();
-  const pics = ['GalaxyBackground.jpg','LeftSideArrow.png','RightSideArrow.png','RedButtonMain.png'];
+  const pics = ['GreenFelt.jpg','RedButtonMain.png','GhostBack.png'];
   const btnPics = [];
-  const cardSuits = ['C','S','D','H'];
-  const deckCards = []; //All cards in array unshuffled
+  const cardSuits = ['C','H','S','D'];
 
-  cardSuits.forEach((suit)=>{
-    for(let i = 1; i<=13; i++){
-      deckCards.push(i+suit);
+  const cardXLocArr = [];
+
+  (function setCardXLocs(){
+    const xStart = cWidth/2-numCards*cardW/2-numCards%2*xDif;
+    for(let i = 0; i<numCards; i++){
+      cardXLocArr.push(Math.floor(xStart+i*(cardW+xDif)));
     }
+  })()
+
+  const deckCards = []; //All cards in array unshuffled
+  cardSuits.forEach((suit)=>{
+    for(let i = 2; i<=14; i++){deckCards.push(i+suit);}
+    // deckCards.push(14+suit);
   });
 
   const deckPics = [];
@@ -89,73 +105,112 @@ const setUp = (function(){
 
   Promise.all(promiseCardImgArr.concat(promiseMiscPicArr)).then(()=>{
     drawBG();
-    dealHand();
-    drawCards();
+    // newGame();
+    // play();
   });
 
   function drawBG(){
-    BGctx.drawImage(miscImgMap.get('GalaxyBackground'),0,0,cWidth,cHeight);
+    BGctx.drawImage(miscImgMap.get('GreenFelt'),0,0,cWidth,cHeight);
+    drawBetFillers1();
   }
 
-  function displayPaytable(){
-    let yCord = PTCords.yTop;
-
-    ctx.font = PTCords.fontSize+"px Arial";
-    ctx.fillStyle = 'white';
-    ctx.textAlign= 'center';
-    ctx.textBaseline = "middle";
-
-    paytableMap.forEach((value, key)=>{
-      ctx.fillText(key,PTCords.xMargin,yCord);
-      for(let i = 1; i<=maxCoins; i++){
-        ctx.fillText(value*i,PTCords.xMargin+PTCords.maxW+PTCords.xDif*i,yCord);
-      }
-      yCord+=PTCords.yDif;
-    })
-  }
-  displayPaytable();
-
-  let hand = new Array(numCards);//Array of card objects
-  let deck;
+  let deck, pHand, dHand;
 
   function dealHand(){
-    deck = deckCards.slice(0,52);
-    const xStart = xBorder+xDif,
-      yLoc = cHeight/2+xDif*HWr;
-    for(let i = 0; i<numCards; i++){
-      //Replace with difference random number generator
-      hand[i] = {id:draw()};
-      hand[i].x = xStart+i*(cardW+xDif);
-      hand[i].y = yLoc;
-      hand[i].w = cardW;
-      hand[i].h = cardH;
-      hand[i].selected = false;
-    }
+    let hand = new Array(numCards);
+    const xStart = cWidth/2-numCards*cardW/2-numCards%2*xDif;
+    for(let i = 0; i<numCards; i++){hand[i] = draw();}
     return hand;
   }
 
   function draw(){
+    //Replace with difference random number generator
     let r = Math.floor(Math.random()*deck.length)
     return deck.splice(r,1)[0];
   }
 
   // defines card clickboxes and draws cards
-  function drawCards(){
-    ctx.clearRect(0,cHeight*0.55,cWidth,cHeight/2);
+  const pYLoc = cHeight-cardH-xDif,
+    dYLoc = xDif;
+
+  function dealCards(){
+    ctx.clearRect(0,cHeight*0.5,cWidth,cHeight/2);
+    //draws players cards
+    let delay = 20;
+    let cardBack = miscImgMap.get('GhostBack');
+    let pace = 40,
+      flipPace = 30;
+
     for(let i = 0; i<numCards; i++){
-      let c = hand[i];
-      ctx.drawImage(setUp.cardImgMap.get(c.id),c.x,c.y,c.w,c.h);
+      let card = cardImgMap.get(pHand[i]),
+        xFin = cardXLocArr[i];
+
+      //Deal player's cards
+      animations.slide(cardBack,cWidth+cardW,-cardH, xFin, pYLoc, cardW, cardH, pace, delay*i, pAnictx, ()=>{
+        animations.flip(cardBack,card,xFin+cardW/2,pYLoc,cardW,cardH,flipPace,cardW/(0.5*flipPace),pAnictx,()=>{
+          pAnictx.drawImage(card,xFin,pYLoc,cardW,cardH);
+        })
+      })
+      //Deal dealer's cards face down;
+      animations.slide(cardBack,cWidth+cardW,-cardH, xFin, dYLoc, cardW, cardH, pace/2, delay*i, ctx, ()=>{
+        ctx.drawImage(cardBack,xFin,dYLoc,cardW,cardH);
+      })
     }
   }
 
-  return{
-    draw:draw,
-    drawCards: drawCards,
-    hand: hand,
-    numCards: numCards,
-    dealHand:dealHand,
-    cardImgMap:cardImgMap,
-    miscImgMap:miscImgMap,
+  function drawDealerHand(){
+    let cardBack = miscImgMap.get('GhostBack');
+    //Add animations here
+    let pace = 40,
+      flipPace = 30;
+    for(let i=0; i<numCards; i++){
+      let card = cardImgMap.get(dHand[i])
+      animations.flip(cardBack,card,cardXLocArr[i]+cardW/2,dYLoc,cardW,cardH,flipPace,cardW/(0.5*flipPace),ctx,()=>{
+        ctx.drawImage(card,cardXLocArr[i],dYLoc,cardW,cardH);
+      })
+    }
   }
 
-})()
+  //Move to UserInterface file
+  const xBetLocsArr = [];
+  function drawBetFillers1(){
+    const yLoc = Math.floor(cHeight/2);
+    let size = Math.floor(cardW*0.7);
+    let xDif = Math.floor(size*0.9),
+      lnWid = Math.floor(size/15);
+    let xLocStart = cWidth/2-(1.5*size+xDif);
+    for(let i = 0; i<3; i++){
+      xBetLocsArr.push(xLocStart+i*(size+xDif))
+      // BGctx.fillRect(xBetLocsArr[i], yLoc-size/2, size, size);
+    }
+
+    betOptionsMap.set('Pair+',{x:xBetLocsArr[0],y:yLoc-size/2,w:size,h:size});
+    betOptionsMap.set('Ante',{x:xBetLocsArr[1],y:yLoc-size/2,w:size,h:size});
+
+    let fontSize = cHeight/25;
+    BGctx.font = fontSize+'px Arial';
+    BGctx.textAlign = 'center';
+    BGctx.textBaseline = 'middle';
+    BGctx.fillStyle = 'yellow';
+    shapes.circle(BGctx,xBetLocsArr[0],yLoc,size/2,lnWid,false,'yellow');
+    BGctx.fillText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);
+    BGctx.fillStyle = 'white';
+    shapes.diamond(BGctx,xBetLocsArr[1],yLoc,size,size,lnWid,false,'red');
+    BGctx.fillText('Ante',xBetLocsArr[1]+size/2,yLoc,size-lnWid*2);
+    shapes.diamond(BGctx,xBetLocsArr[2],yLoc,size,size,lnWid,false,'red');
+    shapes.roundRect(BGctx,xBetLocsArr[2]-size*0.1-lnWid,yLoc,size*1.2+lnWid*2,size+lnWid*2,lnWid,20,false,'white');
+    BGctx.fillText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
+  }
+
+
+//   return{
+//     draw:draw,
+//     dealCards: dealCards,
+//     hand: hand,
+//     numCards: numCards,
+//     dealHand:dealHand,
+//     cardImgMap:cardImgMap,
+//     miscImgMap:miscImgMap,
+//   }
+//
+// })()
