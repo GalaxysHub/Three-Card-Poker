@@ -17,25 +17,21 @@ function slideChipStack(dir, chipStack, chipsArr, cb=()=>{}, wait=0, n=fpa,ctx=t
 
   ctx.save();
   cnv.style.zIndex = 3;
-
   animations.slideCanvas(ctx, cnv, xStart, yStart, xFin, yFin, n, wait, ()=>{
-
     if(fstTime&&(dir=='midUp'||dir=='midDown')){
       fstTime = false;
       posArr.forEach(pos => orictx.clearRect(xBetLocsArr[pos]-chipW,0,chipW*2,cHeight));
     }
-
     //operations to perform with each translation
     ctx.clearRect(0,-cHeight,cWidth,2*cHeight);//2*height in case chipstack exceed cHeight
     for(let i = 0, j = posArr.length; i<j; i++) {
       displayBetChips(chipsArr[i],xBetLocsArr[posArr[i]],ctx);
     }
   },()=>{//callback function
-    ctx.clearRect(0,-cHeight,cWidth,2*cHeight);//2*height in case chipstack exceed cHeight
     cnv.style.zIndex = -10;
     ctx.restore();
-    cb();
     fstTime = true;
+    cb();
   });
 }
 

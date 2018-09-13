@@ -35,16 +35,15 @@ const BGctx = BGCanvas.getContext('2d'),
     cvs.textAlign = 'center';
     cvs.textBaseline = 'middle';
   })
-  
+
 const numCards = 3,
   xDif = Math.floor(cWidth/20),
   cardW = Math.floor(cWidth/8),
   HWr = 3/2,
   cardH = Math.floor(cardW*HWr);
 
-const minBet = 100,
+const minBet = 500,
   maxBet = minBet*20;
-
 
 BGCanvas.style.zIndex = -1;
 glassCanvas.style.zIndex = -1;
@@ -55,17 +54,26 @@ transCanvas.style.zIndex = 0;
 
 function setMainctxProps(){
   let fontSize =  Math.floor(cHeight/8),
-    gFontSize = fontSize*1.5;
-
+    gFontSize = fontSize*1.5,
+    aniFontSize = Math.floor(cHeight/20);
+  anictx.font= aniFontSize+"px Chela";
+  anictx.textBaseline = 'hanging';
+  ctx.font = fontSize+'px Chela';
+  gctx.font = gFontSize+'px TheBlacklist';
+  anictx.fillStyle = 'white';
   ctx.fillStyle = 'red';
-  gctx.fillStyle = 'red';
-  ctx.font = fontSize+'px Arial';
-  gctx.font = gFontSize+'px Arial';
+  gctx.lineWidth = Math.floor(cWidth/120);
+  gctx.strokeStyle = 'black';
+  gctx.fillStyle = 'rgb(180,15,15)';
+  gctx.shadowOffsetX = gFontSize/15;
+  gctx.shadowOffsetY = gFontSize/15;
+  gctx.shadowColor = "rgba(0,0,0,0.5)";
+  gctx.shadowBlur = 4;
 }
 setMainctxProps();
 
 const paytableMap = new Map([
-  ["Royal Flush", {pp: 250, pos: 6}],
+  // ["Royal Flush", {pp: 250, pos: 6}],
   ["Straight Flush", {pp: 40, pos: 5}],
   ["3 of a Kind", {pp: 30, pos: 4}],
   ["Straight", {pp: 6, pos: 3}],
@@ -83,7 +91,6 @@ const paytableMap = new Map([
   const cardSuits = ['C','H','S','D'];
 
   const cardXLocArr = [];
-
   (function setCardXLocs(){
     const xStart = cWidth/2-numCards*cardW/2-numCards%2*xDif;
     for(let i = 0; i<numCards; i++){
@@ -93,8 +100,8 @@ const paytableMap = new Map([
 
   const deckCards = []; //All cards in array unshuffled
   cardSuits.forEach((suit)=>{
-    for(let i = 2; i<=14; i++){deckCards.push(i+suit);}
-    // deckCards.push(14+suit);
+    for(let i = 2; i<=13; i++){deckCards.push(i+suit);}
+    deckCards.push(14+suit);
   });
 
   const deckPics = [];
@@ -105,13 +112,35 @@ const paytableMap = new Map([
 
   Promise.all(promiseCardImgArr.concat(promiseMiscPicArr)).then(()=>{
     drawBG();
-    // newGame();
-    // play();
+    displayPairPlusPT();
+    displayInstructions();
   });
+
+  function displayPairPlusPT(){
+    let fontSize = cHeight/20;
+    let yCord = cHeight/3;
+
+    BGctx.font = fontSize+'px Chela';
+    BGctx.fillStyle = 'white';
+    BGctx.fillText("PairPlus  PayTable",cWidth*0.15,yCord,cWidth*0.25);
+    paytableMap.forEach((value,key)=>{
+      yCord+=cHeight/12;
+      BGctx.fillText(key,cWidth/8,yCord,cWidth*0.15);
+      BGctx.fillText(value.pp,cWidth/4,yCord);
+    })
+  }
+
+  function displayInstructions(){
+    let msg = ['Dealer','Qualifies', 'on Queen', 'High and', 'Better'];
+    let xPos = cWidth*7/8, yPos = cHeight*0.4, yDif = cHeight/12;
+    for(let i = 0, j=msg.length; i<j; i++){
+      BGctx.fillText(msg[i],xPos,yPos+i*yDif);
+    }
+  }
 
   function drawBG(){
     BGctx.drawImage(miscImgMap.get('GreenFelt'),0,0,cWidth,cHeight);
-    drawBetFillers1();
+    drawBetFillers();
   }
 
   let deck, pHand, dHand;
@@ -173,7 +202,7 @@ const paytableMap = new Map([
 
   //Move to UserInterface file
   const xBetLocsArr = [];
-  function drawBetFillers1(){
+  function drawBetFillers(){
     const yLoc = Math.floor(cHeight/2);
     let size = Math.floor(cardW*0.7);
     let xDif = Math.floor(size*0.9),
@@ -188,7 +217,7 @@ const paytableMap = new Map([
     betOptionsMap.set('Ante',{x:xBetLocsArr[1],y:yLoc-size/2,w:size,h:size});
 
     let fontSize = cHeight/25;
-    BGctx.font = fontSize+'px Arial';
+    BGctx.font = fontSize+'px Chela';
     BGctx.textAlign = 'center';
     BGctx.textBaseline = 'middle';
     BGctx.fillStyle = 'yellow';
@@ -201,7 +230,6 @@ const paytableMap = new Map([
     shapes.roundRect(BGctx,xBetLocsArr[2]-size*0.1-lnWid,yLoc,size*1.2+lnWid*2,size+lnWid*2,lnWid,20,false,'white');
     BGctx.fillText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
   }
-
 
 //   return{
 //     draw:draw,

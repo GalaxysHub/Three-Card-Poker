@@ -15,13 +15,9 @@ const account = {
 }
 
 function newGame(){
-  glassBtnCanvas.style.zIndex = 10;
-  glassCanvas.style.zIndex =10;
-  //Move these later
+  canPlay = true;
+  dQlfy = true;
   tctx.clearRect(0,0,cWidth,cHeight);
-  pAnictx.clearRect(0,0,cWidth,cHeight);
-  gctx.clearRect(0,0,cWidth,cHeight);
-  ctx.clearRect(0,0,cWidth,cHeight);
 
   account.play = 0;
   account.balance -= (account.ante+account.pairplus)
@@ -30,56 +26,40 @@ function newGame(){
   getWinInfo(pHand);
   dealCards();
   setTimeout(()=>{
-    gctx.fillText(pHand.type,cWidth/2, pYLoc+cardH/2,cWidth/2);
+    displayHandType(pHand);
     if(account.pairplus>0) ppPayout();
     else{
       glassBtnCanvas.style.zIndex = -1;
       canPlay = true;
     }
-    //write player's hand type
   },2000);
-  console.log(account.balance);
-
 }
 
 function play(){
-  if(canPlay){
-    canPlay = false;
-    glassBtnCanvas.style.zIndex = 10;
-    account.balance -= account.ante;
-    account.play = account.ante;
-    // animations
-    slideChipStack('bottomUp',['Play'],[account.play],()=>{
-      displayPlayChips(anictx);
-      setTimeout(()=>{
-        dealerAction();
-        findWinner();
-      },500);
-    });
-  }
+  account.play = account.ante;
+  account.balance -= account.play;
+  // animations
+  slideChipStack('bottomUp',['Play'],[account.play],()=>{
+    displayPlayChips(anictx);
+    setTimeout(()=>{
+      dealerAction();
+      findWinner();
+    },500);
+  });
 }
 
 function fold(){
-  if(canPlay){
-    canPlay = false;
-    slideChipStack('midDown', ['Ante'],[account.ante],()=>{
-      dealerAction();
-    });
-  }
+  slideChipStack('midUp', ['Ante'],[account.ante],()=>{
+    dealerAction();
+    setTimeout(discard,1000);
+  });
 }
 
 function dealerAction(){
-    glassBtnCanvas.style.zIndex = 10;
     dHand = dealHand();
     drawDealerHand();
-    console.log(account.balance);
     getWinInfo(dHand);
-    gctx.fillText(dHand.type,cWidth/2, dYLoc+cardH/2,cWidth/2);
-    // startGame = true;
-    getChipStacks();
-    setTimeout(()=>{
-      discard();
-    },2000)
+    displayHandType(dHand);
 }
 
 //Algorithiums hardcoded for 3 card hands due to computational simplicity
@@ -119,17 +99,7 @@ function getWinInfo(hand){
 //Looks for condition for Player Win or Push. Player loses by default.
 function findWinner(){
   if(dQlfy==false){
-    gctx.fillText('Dealer Does Not Quality',cWidth/2,cHeight/2,cWidth*0.8);
-    account.balance+=3*account.ante;
-    console.log('dealer does not qualify');
-    //Animations
-    slideChipStack('topDown', ['Ante'],[account.ante],()=>{
-      anictx.clearRect(xBetLocsArr[1],0,chipW,cHeight);
-      displayBetChips(account.ante*2,xBetLocsArr[1],anictx)
-      displayPlayChips(anictx);
-        slideChipStack('midDown',['Ante','Play'], [account.ante*2, account.ante],()=>{
-        },50)
-    });
+    dealerDisqualification();
   }else if(dQlfy){
     let dPos = dHand.winInfo.pos,
       pPos = pHand.winInfo.pos;
@@ -137,40 +107,39 @@ function findWinner(){
     else if(dPos==pPos){settlePush();}
     else{playerLoses();}
   }
-  console.log(account.balance);
-  setTimeout(()=>{
-    account.play = 0; //Move later;
-  },1000);
 }
 
-//finds winner if player and dealer have same type of hand
+//compares dealer and player hands if type is the same
 function settlePush(){
   let pSort = pHand.sort,
-  dSort = dHand.sort;
+    dSort = dHand.sort;
 
   if(pHand.type=="Pair"){
     let pPair = pSort[1],
       dPair = dSort[1];
     //Find Higher Pair
     if(pPair>dPair){playerWins()}
-    else if(pPair==dPair){compareHighCard();}
-    else{playerLoses();}
+    else if(pPair<dPair){playerLoses();}
+    else{compareHighCard(2);}//same pair
   }else{
-    if((pHand.type=="Straight"||pHand.type=="Straight Flush")&&dSort[3]==14&&dSort[2]<pSort[2]){playerWins();}//Looks for lower straight condition
-    else{compareHighCard();}
+    if(pHand.type=="Straight"||pHand.type=="Straight Flush"){
+      //Looks for lower straight condition else compares normally
+      if(dSort[2]==14&&dSort[1]<pSort[1]){playerWins();}
+      else if(pSort[2]==14&&pSort[1]<dSort[1]){playerLoses();}
+      else{compareHighCard(2);}
+    }else{compareHighCard(2);}
   }
 
-  function compareHighCard(){
-    if(pSort[2]>dSort[2]){playerWins();}
-    else if(pSort[2]==dSort[2]){
-      if(pSort[1]>dSort[1]){playerWins();}
-      else if(pSort[1]==dSort[1]){
-        if(pSort[0]>dSort[0]){playerWins();}
-        else if(pSort[0]==dSort[0]){push();}
-      }
+  function compareHighCard(n){
+    let p = pSort[n], d = dSort[n];
+    if(p>d){playerWins();}
+    else if(p<d){playerLoses();}
+    else{
+      if(n==0){push();}
+      else{compareHighCard(n-1)}
     }
-    else{playerLoses();}
   }
+
 }
 
 function discard(){
@@ -178,6 +147,7 @@ function discard(){
   account.disPlay = 0;
   anictx.clearRect(0,0,cWidth,cHeight);
   gctx.clearRect(0,0,cWidth,cHeight);
+  glassBtnCanvas.style.zIndex = -1;
   let pace = 40,
     delay = 10;
 
@@ -188,8 +158,7 @@ function discard(){
 
     animations.slide(pCard, xStart, pYLoc, -2*cardW, -2*cardH, cardW, cardH, pace, delay*i, pAnictx, ()=>{});
     animations.slide(dCard, xStart, dYLoc, -2*cardW, -2*cardH, cardW, cardH, pace, delay*i, ctx, ()=>{
-      glassCanvas.style.zIndex = -1;
-      glassBtnCanvas.style.zIndex = -1;
+      canRebet = true;
     });
   }
 }
@@ -199,6 +168,6 @@ function rebet(){
     displayPairPlusChips(anictx);
     displayAnteChips(anictx);
     newGame();
+    displayBalance();
   },50);
-
 }
