@@ -1,4 +1,4 @@
 # Three-Card-Poker
 HTML5 Three Card Poker
 
-First Version. Incomplete
+Minimum working version. For personal use only.
