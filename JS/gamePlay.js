@@ -40,7 +40,7 @@ function play(){
   account.balance -= account.play;
   // animations
   slideChipStack('bottomUp',['Play'],[account.play],()=>{
-    displayPlayChips(anictx);
+    displayPlayChips(anictx,anictx);
     setTimeout(()=>{
       dealerAction();
       findWinner();
@@ -139,7 +139,6 @@ function settlePush(){
       else{compareHighCard(n-1)}
     }
   }
-
 }
 
 function discard(){
@@ -165,8 +164,7 @@ function discard(){
 
 function rebet(){
   slideChipStack('bottomUp',['Pair+','Ante'], [account.pairplus, account.ante],()=>{
-    displayPairPlusChips(anictx);
-    displayAnteChips(anictx);
+    displayAllBetChips();
     newGame();
     displayBalance();
   },50);

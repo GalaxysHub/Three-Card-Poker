@@ -3,19 +3,21 @@
 const animations = (()=>{
 
   function slide(img,xStart,yStart,xFin,yFin,w,h,n,s,ctx,callback=()=>{}){
+
     if(s>0){//Delays execution by s frames
       requestAnimationFrame(()=>{slide(img,xStart,yStart,xFin,yFin,w,h,n,s-1,ctx,callback)});
     }else{
       if(n>0){
         let dx = Math.floor((xFin-xStart)/n),
-          dy = Math.floor((yFin-yStart)/n),
-          x = xStart+dx,
-          y = yStart+dy;
+        dy = Math.floor((yFin-yStart)/n),
+        x = xStart+dx,
+        y = yStart+dy;
         ctx.clearRect(x-dx,y-dy,w,h);
         ctx.drawImage(img,x,y,w,h)
         requestAnimationFrame(()=>{slide(img,x,y,xFin,yFin,w,h,n-1,s,ctx,callback)});
       }else{callback();}
     }
+
   }
 
   function flip(img1,img2,x,y,w,h,n,inc,ctx,callback){
@@ -51,13 +53,13 @@ const animations = (()=>{
     }
   }
 
-  function fadeOut(text,ctx,a,x,y,dir,callback=()=>{}){
-    ctx.font = "48px Quantico" //make dynamic
-    ctx.clearRect(x,y-100,400,200);
+  function fadeOut(text,ctx,a,x,y,dir,font,callback=()=>{}){
+    ctx.font = font //make dynamic
+    ctx.clearRect(x-200,y-100,400,200);
     ctx.globalAlpha = a;
 
     if(a>0){
-      a-=0.01;
+      a-=0.02;
       if(dir=="up"){
         ctx.fillStyle = 'green';
         ctx.fillText('+'+text,x,y);

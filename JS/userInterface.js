@@ -4,28 +4,38 @@ const btncHeight = Math.floor(cHeight/5);
 
 const btnCanvas = document.getElementById('btnCanvas'),
   btnBGCanvas = document.getElementById('btnBGCanvas'),
+  btnAniCanvas = document.getElementById('btnAniCanvas'),
   glassBtnCanvas = document.getElementById('glassBtnCanvas');
 const BTNctx = btnCanvas.getContext('2d'),
   BGBTNctx = btnBGCanvas.getContext('2d'),
+  aniBTNctx = btnAniCanvas.getContext('2d'),
   gBtnctx = glassBtnCanvas.getContext('2d');
 
-const btnCanvasArr = [btnCanvas, btnBGCanvas, glassBtnCanvas];
-const btnctxArr = [BTNctx, BGBTNctx, gBtnctx];
+const btnCanvasArr = [btnCanvas, btnBGCanvas, btnAniCanvas,glassBtnCanvas];
+const btnctxArr = [BTNctx, BGBTNctx, aniBTNctx, gBtnctx];
 
 btnCanvasArr.forEach(cnv=>{
   cnv.style.position = 'absolute';
   cnv.width = cWidth;
   cnv.height = btncHeight;
   cnv.style.top = cHeight+'px';
+  cnv.style.marginLeft = xMargin+'px';
 })
 btnBGCanvas.style.zIndex = -1;
 glassBtnCanvas.style.zIndex = -1;
+btnAniCanvas.style.zIndex = -1;
 
 btnctxArr.forEach(ctx=>{
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 })
-BTNctx.strokeRect(0,0,cWidth,btncHeight);
+
+function setBtnCtxProps(){
+  let btnFontSize = Math.floor(btncHeight/3);
+  BTNctx.fillStyle = 'white';
+  BTNctx.font = btnFontSize+'px Arial';
+  aniBTNctx.textAlign = 'left';
+}
 
 const btnsPics = ['RedButtonMain.png', 'ButtonBackground.jpg'];
 
@@ -53,20 +63,21 @@ const chipValues = {
   WhiteChip1Side: 1
 }
 
-const btnsPicLoc = './Images/Misc/'
-const chipsTopLoc = './Images/Misc/ChipsTopView/'
-const chipsSideLoc = './Images/Misc/ChipsSideView/'
+const btnsPicLoc = './Images/Misc/',
+  chipsTopLoc = './Images/Misc/ChipsTopView/',
+  chipsSideLoc = './Images/Misc/ChipsSideView/'
 
-const buttonsImgMap = new Map();
-const chipImgMap = new Map();
-const chipBtnImgMap = new Map();
+const buttonsImgMap = new Map(),
+  chipImgMap = new Map(),
+  chipBtnImgMap = new Map();
 
-const promiseButtonsImgArr = asyncHelperFunctions.createPromImgArr(btnsPics, buttonsImgMap, btnsPicLoc);
-const promiseChipSideViewImgArr = asyncHelperFunctions.createPromImgArr(chipPics, chipImgMap, chipsSideLoc);
-const promisechipBtnImgArr = asyncHelperFunctions.createPromImgArr(chipBtnsPics, chipBtnImgMap, chipsTopLoc);
+const promiseButtonsImgArr = asyncHelperFunctions.createPromImgArr(btnsPics, buttonsImgMap, btnsPicLoc),
+  promiseChipSideViewImgArr = asyncHelperFunctions.createPromImgArr(chipPics, chipImgMap, chipsSideLoc),
+  promisechipBtnImgArr = asyncHelperFunctions.createPromImgArr(chipBtnsPics, chipBtnImgMap, chipsTopLoc);
 
 Promise.all(promiseButtonsImgArr.concat(promiseChipSideViewImgArr).concat(promisechipBtnImgArr)).then(()=>{
   BGBTNctx.drawImage(buttonsImgMap.get('ButtonBackground'),0,0,cWidth,btncHeight);//draws Background
+  BGBTNctx.strokeRect(0,0,cWidth,btncHeight);
   drawChipButtons();
   setBtnCtxProps();
   drawButtons();
@@ -77,17 +88,11 @@ const optionButtonsMap = new Map(),
   chipBtnMap = new Map(),
   betOptionsMap = new Map();
 
-function setBtnCtxProps(){
-  let btnFontSize = Math.floor(btncHeight/3);
-  BTNctx.fillStyle = 'white';
-  BTNctx.font = btnFontSize+'px Arial';
-}
-
 (function setButtons(){
   const xPos = Math.floor(cWidth/2), yPos = Math.floor(btncHeight*.65),
     maxWid = Math.floor(cWidth/2), fontSize = Math.floor(btncHeight/2);
 
-  const vertGap = Math.floor(btncHeight/20);
+  // const vertGap = Math.floor(btncHeight/20);
 
   const btnWid =  3*fontSize,
     btnHeight = fontSize,
@@ -95,8 +100,8 @@ function setBtnCtxProps(){
     btnXPos = xPos-btnWid/2,
     btnYPos = Math.floor((btncHeight-btnSize)/2);
   const chipSize = Math.floor(btncHeight*0.5),
-    chipsXPosStart = Math.floor(chipSize*0.8),
-    chipsXDif = chipSize;
+    chipsXDif = Math.floor(chipSize*1.1),
+    chipsXPosStart = Math.floor(cWidth*0.25-3*chipSize-2*(chipsXDif-chipSize));
 
   optionButtonsMap.set("Deal",{img:'RedButtonMain',x:cWidth/2-1.5*btnSize, y:btncHeight*0.2, w:3*btnSize, h:btncHeight*0.6});
   optionButtonsMap.set("Play",{img:'RedButtonMain',x:cWidth/2-1.5*btnSize, y:btncHeight/10, w:3*btnSize, h:btncHeight*0.4});
@@ -115,7 +120,6 @@ function setBtnCtxProps(){
   chipBtnMap.set('GreenChip',{img:'GreenChip25Top',x:chipXPosArr[2],y:yPosChip,h:chipSize,w:chipSize, v:chipValues.GreenChip25Side, s:"GreenChip25Side"});
   chipBtnMap.set('BlackChip',{img:'BlackChip100Top',x:chipXPosArr[3],y:yPosChip,h:chipSize,w:chipSize, v:chipValues.BlackChip100Side, s:"BlackChip100Side"});
   chipBtnMap.set('PurpleChip',{img:'PurpleChip500Top',x:chipXPosArr[4],y:yPosChip,h:chipSize,w:chipSize, v:chipValues.PurpleChip500Side, s:"PurpleChip500Side"});
-
 })()
 
 let chipW = Math.floor(cardW*0.7),
@@ -125,12 +129,16 @@ let chipW = Math.floor(cardW*0.7),
   betYLoc = Math.floor(chipYLoc+chipH);
 let chips = Object.keys(chipValues);
 
-function displayBetChips(qnty,chipXLoc,cvs=anictx){
+function displayBetChips(qnty,chipXLoc,cvs=anictx,cvs2=null){
   let numChips = calcMinChips(qnty);
-  let betXLoc = Math.floor(chipXLoc+chipW/2),
+  let xPos = Math.floor(chipXLoc+chipW/2),
+    yPos = Math.floor(betYLoc+chipYDif/2),
     dif = 0;
   cvs.clearRect(chipXLoc,0,chipW,cHeight);
-  cvs.fillText(qnty,betXLoc,betYLoc);
+  if(cvs2){
+    cvs2.strokeText(qnty,xPos,yPos,chipW);
+    cvs2.fillText(qnty,xPos,yPos,chipW);
+  }
   for(let i = 0, len = chips.length; i<len; i++){
     for(let j = 0; j<numChips[i]; j++){
       cvs.drawImage(chipImgMap.get(chips[i]),chipXLoc,chipYLoc-dif*chipYDif,chipW,chipH);
@@ -139,22 +147,23 @@ function displayBetChips(qnty,chipXLoc,cvs=anictx){
   }
 }
 
-function displayPairPlusChips(cvs=anictx){
-  displayBetChips(account.disPairplus,xBetLocsArr[0],cvs);
+function displayPairPlusChips(cvs=anictx,cvs2=null){
+  displayBetChips(account.disPairplus,xBetLocsArr[0],cvs,cvs2);
 }
 
-function displayAnteChips(cvs=anictx){
-  displayBetChips(account.disAnte,xBetLocsArr[1],cvs);
+function displayAnteChips(cvs=anictx,cvs2=null){
+  displayBetChips(account.disAnte,xBetLocsArr[1],cvs,cvs2);
 }
 
-function displayPlayChips(cvs=anictx){
-  if(account.play){displayBetChips(account.play,xBetLocsArr[2],cvs);}
+function displayPlayChips(cvs=anictx,cvs2=null){
+  if(account.play){displayBetChips(account.play,xBetLocsArr[2],cvs,cvs2);}
 }
+
 
 function displayAllBetChips(){
-  displayPairPlusChips(anictx);
-  displayAnteChips(anictx);
-  displayPlayChips(anictx);
+  displayPairPlusChips(anictx,anictx);
+  displayAnteChips(anictx,anictx);
+  displayPlayChips(anictx,anictx);
 }
 
 //calculates minimum number of each chip need to make a bet
@@ -167,16 +176,6 @@ function calcMinChips(bet){
     bet = bet%values[i];
   }
   return chipStack;
-}
-
-function displayBalance(){
-  let fontSize = Math.floor(btncHeight/3);
-  let xPos = Math.floor(cWidth*0.8)
-  BTNctx.textAlign = 'center';
-  BTNctx.font= fontSize+'px TheBlacklist';
-  BTNctx.clearRect(cWidth*0.7,0,cWidth*0.25,btncHeight);
-  BTNctx.fillText('Balance',xPos,btncHeight*0.3);
-  BTNctx.fillText(account.balance,xPos,btncHeight*0.7);
 }
 
 function drawChipButtons(){
@@ -226,8 +225,10 @@ function drawButtons(){
     let rBet = minBet-account.ante;
     if(rBet>0){
       BTNctx.font = btnFontSize/2+'px Chela';
+      BTNctx.strokeText('Bet '+ rBet+ ' more to play', d.x+d.w/2, d.y+d.h/2, d.w*0.9);
       BTNctx.fillText('Bet '+ rBet+ ' more to play', d.x+d.w/2, d.y+d.h/2, d.w*0.9);
     }else{
+      BTNctx.strokeText('Deal', d.x+d.w/2, d.y+d.h/2, d.w);
       BTNctx.fillText('Deal', d.x+d.w/2, d.y+d.h/2, d.w);
     }
   }else if(canPlay){
@@ -236,8 +237,10 @@ function drawButtons(){
     let f = optionButtonsMap.get('Fold');
 
     BTNctx.drawImage(miscImgMap.get(p.img),p.x,p.y,p.w,p.h);
+    BTNctx.strokeText('Play', p.x+p.w/2, p.y+p.h/2, p.w);
     BTNctx.fillText('Play', p.x+p.w/2, p.y+p.h/2, p.w);
     BTNctx.drawImage(miscImgMap.get(f.img),f.x,f.y,f.w,f.h);
+    BTNctx.strokeText('Fold', f.x+f.w/2, f.y+f.h/2, f.w);
     BTNctx.fillText('Fold', f.x+f.w/2, f.y+f.h/2, f.w);
   }else if(!startGame&&!canPlay){
     BTNctx.font = btnFontSize/2+'px Chela';
@@ -245,16 +248,42 @@ function drawButtons(){
     let f = optionButtonsMap.get('New Bet');
 
     BTNctx.drawImage(miscImgMap.get(p.img),p.x,p.y,p.w,p.h);
+    BTNctx.strokeText('Rebet', p.x+p.w/2, p.y+p.h/2, p.w);
     BTNctx.fillText('Rebet', p.x+p.w/2, p.y+p.h/2, p.w);
     BTNctx.drawImage(miscImgMap.get(f.img),f.x,f.y,f.w,f.h);
+    BTNctx.strokeText('New Bet', f.x+f.w/2, f.y+f.h/2, f.w);
     BTNctx.fillText('New Bet', f.x+f.w/2, f.y+f.h/2, f.w);
   }
 }
 
-function displayAll(){
-  drawButtons();
-  displayAllBetChips();
-  displayBalance();
+const xBalPos = Math.floor(cWidth*0.8);
+const yBalPos = Math.floor(btncHeight*0.7);
+function updateBalance(amt){
+  let font = Math.floor(btncHeight/3)+'px TheBlacklist';
+  animations.fadeOut(amt,aniBTNctx,1,xBalPos,yBalPos,"up",font);
+}
+
+function displayBalance(){
+  let fontSize = Math.floor(btncHeight/3);
+  BTNctx.textAlign = 'center';
+  BTNctx.font= fontSize+'px TheBlacklist';
+  BTNctx.clearRect(cWidth*0.7,0,cWidth*0.25,btncHeight);
+  BTNctx.strokeText('Balance',xBalPos,btncHeight*0.3);
+  BTNctx.strokeText(account.balance,xBalPos,yBalPos);
+  BTNctx.fillText('Balance',xBalPos,btncHeight*0.3);
+  BTNctx.fillText(account.balance,xBalPos,yBalPos);
+}
+
+function checkBalance(inc){
+  gctx.clearRect(0,0,cWidth,cHeight);
+  let balanceNeeded =  account.balance-(account.pairplus+account.ante+inc);
+  if(balanceNeeded<account.ante){
+    gctx.strokeText("Insufficient",cWidth/2,cHeight*0.4,cWidth*0.9)
+    gctx.strokeText("Balance to Play",cWidth/2,cHeight*0.6,cWidth*0.9)
+    gctx.fillText("Insufficient",cWidth/2,cHeight*0.4,cWidth*0.9)
+    gctx.fillText("Balance to Play",cWidth/2,cHeight*0.6,cWidth*0.9)
+    return false;
+  }else if(balanceNeeded>=account.ante){return true;}
 }
 
 function getMousePos(cvn, evt){
@@ -266,17 +295,7 @@ function getMousePos(cvn, evt){
 }
 
 function isInside(pos, rect){
-    return pos.x > rect.x && pos.x < rect.x+rect.w && pos.y < rect.y+rect.h && pos.y > rect.y
-}
-
-function checkBalance(inc){
-  gctx.clearRect(0,0,cWidth,cHeight);
-  let balanceNeeded =  account.balance-(account.pairplus+account.ante+inc);
-  if(balanceNeeded<account.ante){
-    gctx.fillText("Insufficient",cWidth/2,cHeight*0.4,cWidth*0.9)
-    gctx.fillText("Balance to Play",cWidth/2,cHeight*0.6,cWidth*0.9)
-    return false;
-  }else if(balanceNeeded>=account.ante){return true;}
+  return pos.x > rect.x && pos.x < rect.x+rect.w && pos.y < rect.y+rect.h && pos.y > rect.y
 }
 
 let canRebet;
@@ -301,9 +320,9 @@ btnCanvas.addEventListener('click', function(evt){
           if(checkBalance(inc)===true){
             account.ante+=inc;
             //animations
-            animations.slide(chipImgMap.get(chip.s),chip.x,cHeight,xBetLocsArr[1],cHeight/2,chipW,chipH,25,0,anictx,()=>{
+            animations.slide(chipImgMap.get(chip.s),chip.x,cHeight,xBetLocsArr[1],cHeight/2-chipH/2,chipW,chipH,25,0,anictx,()=>{
               account.disAnte+=inc;
-              displayAnteChips();
+              displayAnteChips(anictx,anictx);
             });
           }else{console.log('insufficient balance to play');}
         }
@@ -311,9 +330,9 @@ btnCanvas.addEventListener('click', function(evt){
           if(checkBalance(inc)===true){
             account.pairplus+=inc;
             //animations
-            animations.slide(chipImgMap.get(chip.s),chip.x,cHeight,xBetLocsArr[0],cHeight/2,chipW,chipH,25,0,anictx,()=>{
+            animations.slide(chipImgMap.get(chip.s),chip.x,cHeight,xBetLocsArr[0],cHeight/2-chipH/2,chipW,chipH,25,0,anictx,()=>{
               account.disPairplus+=inc;
-              displayPairPlusChips();
+              displayPairPlusChips(anictx,anictx);
             });
           }else{console.log('insufficient balance to play');}
         }
@@ -338,7 +357,7 @@ btnCanvas.addEventListener('click', function(evt){
     let n = optionButtonsMap.get('New Bet');
     if(isInside(mousePos,r)){
       // glassBtnCanvas.style.zIndex = 10;
-      console.log('rebet clicked');
+      console.log('rebet click');
       if(checkBalance(0)){
         canPlay = true;
         glassBtnCanvas.style.zIndex = 10;
@@ -372,5 +391,6 @@ pAniCanvas.addEventListener('click', function(evt){
     selector = 'Pair+';
     console.log('Pair+ clicked');
   }
-  displayAll();
+  drawButtons();
+  displayAllBetChips();
 },false);
