@@ -45,7 +45,7 @@ const numCards = 3,
   HWr = 3/2,
   cardH = Math.floor(cardW*HWr);
 
-const minBet = 500,
+const minBet = 250,
   maxBet = minBet*20;
 
 BGCanvas.style.zIndex = -1;
@@ -73,7 +73,7 @@ function setMainctxProps(){
   gctx.shadowColor = "rgba(0,0,0,0.5)";
   gctx.shadowBlur = 4;
 }
-setMainctxProps();
+
 
 const paytableMap = new Map([
   // ["Royal Flush", {pp: 250, pos: 6}],
@@ -114,6 +114,7 @@ const paytableMap = new Map([
     promiseMiscPicArr = asyncHelperFunctions.createPromImgArr(pics, miscImgMap, picLoc);
 
   Promise.all(promiseCardImgArr.concat(promiseMiscPicArr)).then(()=>{
+    setMainctxProps();
     drawBG();
 
   });
@@ -227,7 +228,7 @@ const paytableMap = new Map([
 
     let fontSize = cHeight/25;
     BGctx.font = fontSize+'px Chela';
-    
+
     BGctx.strokeStyle = 'black';
     BGctx.lineWidth = Math.floor(cHeight/200);
     BGctx.strokeText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);

@@ -6,7 +6,7 @@ function ppPayout(){
     gctx.strokeText("Pair Plus Winner",cWidth/2,cHeight/2,cWidth*0.8);
     gctx.fillText("Pair Plus Winner",cWidth/2,cHeight/2,cWidth*0.8);
     let payout = account.pairplus*(pHand.winInfo.pp+1);
-    account.balance+=(payout)*account.pairplus;
+    account.balance+=payout;
     slideChipStack('topDown', ['Pair+'],[account.pairplus*(pHand.winInfo.pp)],()=>{
       displayBetChips(payout,xBetLocsArr[0],tctx,anictx);
       slideChipStack('midDown',['Pair+'], [payout],()=>{
