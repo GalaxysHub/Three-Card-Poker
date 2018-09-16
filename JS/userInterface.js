@@ -78,10 +78,14 @@ const promiseButtonsImgArr = asyncHelperFunctions.createPromImgArr(btnsPics, but
 Promise.all(promiseButtonsImgArr.concat(promiseChipSideViewImgArr).concat(promisechipBtnImgArr)).then(()=>{
   BGBTNctx.drawImage(buttonsImgMap.get('ButtonBackground'),0,0,cWidth,btncHeight);//draws Background
   BGBTNctx.strokeRect(0,0,cWidth,btncHeight);
-  drawChipButtons();
-  setBtnCtxProps();
-  drawButtons();
-  displayBalance();
+  document.fonts.load("12px Chela").then(()=>{
+    document.fonts.load("12px TheBlacklist").then(()=>{
+      drawChipButtons();
+      setBtnCtxProps();
+      drawButtons();
+      displayBalance();
+    })
+  })
 });
 
 const optionButtonsMap = new Map(),

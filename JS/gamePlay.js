@@ -17,6 +17,7 @@ const account = {
 function newGame(){
   canPlay = true;
   dQlfy = true;
+  gctx.clearRect(0,0,cWidth,cHeight);
   tctx.clearRect(0,0,cWidth,cHeight);
 
   account.play = 0;

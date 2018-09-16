@@ -7,17 +7,18 @@ const animations = (()=>{
     if(s>0){//Delays execution by s frames
       requestAnimationFrame(()=>{slide(img,xStart,yStart,xFin,yFin,w,h,n,s-1,ctx,callback)});
     }else{
-      if(n>0){
-        let dx = Math.floor((xFin-xStart)/n),
-        dy = Math.floor((yFin-yStart)/n),
-        x = xStart+dx,
-        y = yStart+dy;
-        ctx.clearRect(x-dx,y-dy,w,h);
-        ctx.drawImage(img,x,y,w,h)
-        requestAnimationFrame(()=>{slide(img,x,y,xFin,yFin,w,h,n-1,s,ctx,callback)});
-      }else{callback();}
-    }
+      let dx = (xFin-xStart)/n, dy = (yFin-yStart)/n;//division is computional expensive; do this once
+      slideABit(img,xStart,yStart,xFin,yFin,w,h,n,ctx,callback);
+      function slideABit(img,xStart,yStart,xFin,yFin,w,h,n,ctx,callback){
+        let x = xStart+dx, y = yStart+dy;
+        ctx.clearRect(Math.floor(x-dx),Math.floor(y-dy),w,h);//Erases last image
+        ctx.drawImage(img,Math.floor(x),Math.floor(y),w,h);
 
+        if(n>1){
+          requestAnimationFrame(()=>{slideABit(img,x,y,xFin,yFin,w,h,n-1,ctx,callback)});
+        }else{callback();}
+      }
+    }
   }
 
   function flip(img1,img2,x,y,w,h,n,inc,ctx,callback){

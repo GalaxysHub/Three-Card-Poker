@@ -115,9 +115,54 @@ const paytableMap = new Map([
 
   Promise.all(promiseCardImgArr.concat(promiseMiscPicArr)).then(()=>{
     setMainctxProps();
-    drawBG();
-
+    document.fonts.load("12px Chela").then(()=>{
+      drawBG();
+    })
   });
+
+  function drawBG(){
+    BGctx.drawImage(miscImgMap.get('GreenFelt'),0,0,cWidth,cHeight);
+    BGctx.strokeRect(0,0,cWidth,cHeight);
+    drawBetFillers();
+    displayPairPlusPT();
+    displayInstructions();
+
+  }
+
+  function drawBetFillers(){
+    const yLoc = Math.floor(cHeight/2);
+    let size = Math.floor(cardW*0.7);
+    let xDif = Math.floor(size*0.9),
+      lnWid = Math.floor(size/15);
+    let xLocStart = cWidth/2-(1.5*size+xDif);
+    for(let i = 0; i<3; i++){
+      xBetLocsArr.push(xLocStart+i*(size+xDif))
+    }
+
+    betOptionsMap.set('Pair+',{x:xBetLocsArr[0],y:yLoc-size/2,w:size,h:size});
+    betOptionsMap.set('Ante',{x:xBetLocsArr[1],y:yLoc-size/2,w:size,h:size});
+
+    let fontSize = cHeight/25;
+    BGctx.font = fontSize+'px Chela';
+
+    BGctx.strokeStyle = 'black';
+    BGctx.lineWidth = Math.floor(cHeight/200);
+    BGctx.strokeText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);
+    BGctx.strokeText('Ante',xBetLocsArr[1]+size/2,yLoc,size-lnWid*2);
+    BGctx.strokeText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
+
+    BGctx.textAlign = 'center';
+    BGctx.textBaseline = 'middle';
+    BGctx.fillStyle = 'yellow';
+    shapes.circle(BGctx,xBetLocsArr[0],yLoc,size/2,lnWid,false,'yellow');
+    BGctx.fillText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);
+    BGctx.fillStyle = 'white';
+    shapes.diamond(BGctx,xBetLocsArr[1],yLoc,size,size,lnWid,false,'red');
+    BGctx.fillText('Ante',xBetLocsArr[1]+size/2,yLoc,size-lnWid*2);
+    shapes.diamond(BGctx,xBetLocsArr[2],yLoc,size,size,lnWid,false,'red');
+    shapes.roundRect(BGctx,xBetLocsArr[2]-size*0.1-lnWid,yLoc,size*1.2+lnWid*2,size+lnWid*2,lnWid,20,false,'white');
+    BGctx.fillText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
+  }
 
   function displayPairPlusPT(){
     BGctx.lineWidth = Math.floor(cHeight/200);
@@ -145,14 +190,6 @@ const paytableMap = new Map([
       BGctx.strokeText(msg[i],xPos,yPos+i*yDif);
       BGctx.fillText(msg[i],xPos,yPos+i*yDif);
     }
-  }
-
-  function drawBG(){
-    BGctx.drawImage(miscImgMap.get('GreenFelt'),0,0,cWidth,cHeight);
-    BGctx.strokeRect(0,0,cWidth,cHeight);
-    drawBetFillers();
-    displayPairPlusPT();
-    displayInstructions();
   }
 
   let deck, pHand, dHand;
@@ -213,40 +250,7 @@ const paytableMap = new Map([
 
   //Move to UserInterface file
   const xBetLocsArr = [];
-  function drawBetFillers(){
-    const yLoc = Math.floor(cHeight/2);
-    let size = Math.floor(cardW*0.7);
-    let xDif = Math.floor(size*0.9),
-      lnWid = Math.floor(size/15);
-    let xLocStart = cWidth/2-(1.5*size+xDif);
-    for(let i = 0; i<3; i++){
-      xBetLocsArr.push(xLocStart+i*(size+xDif))
-    }
 
-    betOptionsMap.set('Pair+',{x:xBetLocsArr[0],y:yLoc-size/2,w:size,h:size});
-    betOptionsMap.set('Ante',{x:xBetLocsArr[1],y:yLoc-size/2,w:size,h:size});
-
-    let fontSize = cHeight/25;
-    BGctx.font = fontSize+'px Chela';
-
-    BGctx.strokeStyle = 'black';
-    BGctx.lineWidth = Math.floor(cHeight/200);
-    BGctx.strokeText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);
-    BGctx.strokeText('Ante',xBetLocsArr[1]+size/2,yLoc,size-lnWid*2);
-    BGctx.strokeText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
-
-    BGctx.textAlign = 'center';
-    BGctx.textBaseline = 'middle';
-    BGctx.fillStyle = 'yellow';
-    shapes.circle(BGctx,xBetLocsArr[0],yLoc,size/2,lnWid,false,'yellow');
-    BGctx.fillText('Pair+',xBetLocsArr[0]+size/2,yLoc,size-lnWid*2);
-    BGctx.fillStyle = 'white';
-    shapes.diamond(BGctx,xBetLocsArr[1],yLoc,size,size,lnWid,false,'red');
-    BGctx.fillText('Ante',xBetLocsArr[1]+size/2,yLoc,size-lnWid*2);
-    shapes.diamond(BGctx,xBetLocsArr[2],yLoc,size,size,lnWid,false,'red');
-    shapes.roundRect(BGctx,xBetLocsArr[2]-size*0.1-lnWid,yLoc,size*1.2+lnWid*2,size+lnWid*2,lnWid,20,false,'white');
-    BGctx.fillText('Play',xBetLocsArr[2]+size/2,yLoc,size-lnWid*2);
-  }
 
 //   return{
 //     draw:draw,
