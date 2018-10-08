@@ -113,11 +113,13 @@ const paytableMap = new Map([
   const promiseCardImgArr = asyncHelperFunctions.createPromImgArr(deckPics, cardImgMap, cardPicLoc),
     promiseMiscPicArr = asyncHelperFunctions.createPromImgArr(pics, miscImgMap, picLoc);
 
-  Promise.all(promiseCardImgArr.concat(promiseMiscPicArr)).then(()=>{
+  Promise.all(promiseCardImgArr.concat(promiseMiscPicArr))
+  .then(()=>{
     setMainctxProps();
-    document.fonts.load("12px Chela").then(()=>{
-      drawBG();
-    })
+    document.fonts.load("12px Chela");
+  })
+  .then(()=>{
+    drawBG();
   });
 
   function drawBG(){

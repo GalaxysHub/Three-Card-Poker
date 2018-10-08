@@ -8,7 +8,9 @@ function ppPayout(){
     let payout = account.pairplus*(pHand.winInfo.pp+1);
     account.balance+=payout;
     slideChipStack('topDown', ['Pair+'],[account.pairplus*(pHand.winInfo.pp)],()=>{
-      displayBetChips(payout,xBetLocsArr[0],tctx,anictx);
+      let xLoc = xBetLocsArr[0];
+      anictx.clearRect(xLoc,-chipW,chipW*2,cHeight);
+      displayBetChips(payout,xLoc,tctx,anictx);
       slideChipStack('midDown',['Pair+'], [payout],()=>{
         updateBalance(payout);
         displayBalance();

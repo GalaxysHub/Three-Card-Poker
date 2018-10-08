@@ -17,7 +17,7 @@ function slideChipStack(dir, chipStack, chipsArr, cb=()=>{}, wait=0, n=fpa,ctx=t
 
   ctx.save();
   cnv.style.zIndex = 3;
-  animations.slideCanvas(ctx, cnv, xStart, yStart, xFin, yFin, n, wait, ()=>{
+  animations.slideCanvas(ctx, xStart, yStart, xFin, yFin, n, wait, ()=>{
     if(fstTime&&(dir=='midUp'||dir=='midDown')){
       fstTime = false;
       posArr.forEach(pos => orictx.clearRect(xBetLocsArr[pos]-chipW,0,chipW*2,cHeight));

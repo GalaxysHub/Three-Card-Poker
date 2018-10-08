@@ -34,22 +34,22 @@ const animations = (()=>{
   }
 
   let firstTime = true;
-  function slideCanvas(ctx=ctx, cnv=canvas, xStart,yStart,xFin,yFin,n,s,fn=()=>{},callback=()=>{}){
+  function slideCanvas(cvs, xStart,yStart,xFin,yFin,n,s,fn=()=>{},callback=()=>{}){
     if(s>0){
-      requestAnimationFrame(()=>{slideCanvas(ctx, cnv, xStart,yStart,xFin,yFin,n,s-1,fn,callback)});
+      requestAnimationFrame(()=>{slideCanvas(cvs, xStart,yStart,xFin,yFin,n,s-1,fn,callback)});
     }else{
       if(n>0){
         if(firstTime){
           firstTime=false;
-          ctx.translate(xStart,yStart);
+          cvs.translate(xStart,yStart);
         }
         let dx = Math.floor((xFin-xStart)/n),
           dy = Math.floor((yFin-yStart)/n),
           x = xStart+dx,
           y = yStart+dy;
-        ctx.translate(dx,dy);
+        cvs.translate(dx,dy);
         fn();
-        requestAnimationFrame(()=>{slideCanvas(ctx,cnv,x,y,xFin,yFin,n-1,s,fn,callback)});
+        requestAnimationFrame(()=>{slideCanvas(cvs,x,y,xFin,yFin,n-1,s,fn,callback)});
       }else{callback();firstTime=true;}
     }
   }
