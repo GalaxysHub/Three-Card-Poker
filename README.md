@@ -11,7 +11,9 @@ Minimum working version. For personal use only.
 ## Download Instructions
 
 Download and unzip the repo. 
+
 Open the file named index.html. 
+
 If images/fonts are missing, Refresh the page.
 
 ## Game Rules
@@ -23,5 +25,7 @@ https://wizardofodds.com/games/blackjack/basics/
 ## Game Features
 
 Click the Pair+ region to make a pair plus bet.
+
 Click the Ante region to make an ante bet.
+
 Double click a stack to remove it.
