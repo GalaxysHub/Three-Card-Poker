@@ -33,7 +33,7 @@ Double click a stack to remove it.
 ## Third Party Contributions
 
 ### Fonts
-https://www.fontsquirrel.com/fonts/list/find_fonts?q%5Bterm%5D=chela&q%5Bsearch_check%5D=Y
+https://www.fontsquirrel.com/
 
 ### Images
 Chip images made with Paint 3D
