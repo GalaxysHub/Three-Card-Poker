@@ -29,3 +29,15 @@ Click the Pair+ region to make a pair plus bet.
 Click the Ante region to make an ante bet.
 
 Double click a stack to remove it.
+
+## Third Party Contributions
+
+### Fonts
+https://www.fontsquirrel.com/fonts/list/find_fonts?q%5Bterm%5D=chela&q%5Bsearch_check%5D=Y
+
+### Images
+Chip images made with Paint 3D
+
+Bicycle Playing Cards
+
+Buttons created with https://dabuttonfactory.com/
