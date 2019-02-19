@@ -1,7 +1,8 @@
 # Three-Card-Poker
 HTML5 Three Card Poker
 
-Written in pure Vanilla Javascript with no third-party libraries. 
+Written in pure Vanilla Javascript with no third-party libraries.  
+
 Minimum working version. For personal use only.
 
 <img width="1123" alt="thirdcardpoker" src="https://user-images.githubusercontent.com/39435918/53034082-1fedc580-3438-11e9-92b1-9e9ff6fa5f69.PNG">
