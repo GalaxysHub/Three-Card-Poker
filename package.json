@@ -1,0 +1,23 @@
+{
+  "name": "three-card-poker",
+  "version": "1.0.0",
+  "description": "HTML5 Three Card Poker",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GalaxysHub/Three-Card-Poker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GalaxysHub/Three-Card-Poker/issues"
+  },
+  "homepage": "https://github.com/GalaxysHub/Three-Card-Poker#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
