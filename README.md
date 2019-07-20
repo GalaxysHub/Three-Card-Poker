@@ -1,5 +1,6 @@
 # Three-Card-Poker
 
+See deployed app here: https://three-card-poker.herokuapp.com/3CardPoker.html
 
 ## Description
 HTML5 Three Card Poker
@@ -13,9 +14,9 @@ Minimum working version. For personal use only.
 
 ## Download Instructions
 
-Download and unzip the repo. 
+Download and unzip the repo.
 
-Open the file named index.html. 
+Open the file named index.html.
 
 If images/fonts are missing, Refresh the page.
 

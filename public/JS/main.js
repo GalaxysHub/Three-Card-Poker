@@ -1,12 +1,10 @@
 "use strict";
 
-const cHeight = Math.floor(window.innerHeight*0.8),
-  cWidth = Math.floor(cHeight*1.8);
+const cWidth = Math.floor(window.innerWidth),
+  cHeight = Math.floor(cWidth*0.55);
 
 const cShiftY = -5;
 let xMargin=0;
-
-if(window.innerWidth>cWidth){xMargin = Math.floor((window.innerWidth-cWidth)/2);}
 
 const bCanvas = document.getElementById("bannerCanvas"),
   BGCanvas = document.getElementById('BGCanvas'),
@@ -15,6 +13,7 @@ const bCanvas = document.getElementById("bannerCanvas"),
   pAniCanvas = document.getElementById('pAniCanvas'),
   transCanvas = document.getElementById('transCanvas'),
   glassCanvas = document.getElementById('glassCanvas');
+
 const BGctx = BGCanvas.getContext('2d'),
   ctx = mainCanvas.getContext('2d'),
   anictx = aniCanvas.getContext('2d'),
