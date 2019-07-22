@@ -24,7 +24,7 @@ If images/fonts are missing, Refresh the page.
 
 See game rules here:
 
-https://wizardofodds.com/games/blackjack/basics/
+https://wizardofodds.com/games/three-card-poker/
 
 ## Game Features
 
